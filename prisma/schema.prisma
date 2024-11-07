@@ -1,0 +1,234 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Collection {
+  id             String           @id @default(cuid())
+  name           String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  categoryId     String?
+  Category       Category?        @relation(fields: [categoryId], references: [id])
+  CollectionType CollectionType[]
+
+  @@index([name])
+}
+
+model Product {
+  id               String             @id @default(cuid())
+  title            String
+  price            Int
+  rating           Int?
+  description      String
+  uploadStatus     UploadStatus       @default(PENDING)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  collectionTypeId String?
+  bestSellerId     String?
+  gender           Gender             @default(UNISEX_ALL)
+  orderTotal       Int                @default(0)
+  CartItem         CartItem[]
+  Featured         Featured?
+  image            Image[]
+  OrderedItem      OrderedItem[]
+  BestSeller       BestSeller?        @relation(fields: [bestSellerId], references: [id])
+  CollectionType   CollectionType?    @relation(fields: [collectionTypeId], references: [id])
+  ProductSizeColor ProductSizeColor[]
+  review           Reviews[]
+}
+
+model Size {
+  id               Int                @id @default(autoincrement())
+  name             String             @unique
+  description      String?
+  order            Int?              
+  type             String?            @default("clothing")
+  ProductSizeColor ProductSizeColor[]
+}
+
+model ProductSizeColor {
+  id        String   @id @default(cuid())
+  inStock   Boolean  @default(true)
+  quantity  Int      @default(0)
+  productId String
+  sizeId    Int
+  colorId   String
+  price     Decimal?
+  color     Image    @relation(fields: [colorId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+  size      Size     @relation(fields: [sizeId], references: [id])
+
+  @@unique([productId, sizeId, colorId])
+}
+
+model Image {
+  id               String             @id @default(cuid())
+  color            String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  productId        String?
+  colorValue       String?
+  Product          Product?           @relation(fields: [productId], references: [id])
+  file             ImageUrl[]
+  ProductSizeColor ProductSizeColor[]
+}
+
+model ImageUrl {
+  id        String   @id @default(cuid())
+  url       String   @unique
+  key       String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  imageId   String?
+  Image     Image?   @relation(fields: [imageId], references: [id])
+}
+
+model CollectionType {
+  id           String     @id @default(cuid())
+  name         String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  collectionId String
+  orderTotal   Int        @default(0)
+  Collection   Collection @relation(fields: [collectionId], references: [id])
+  Product      Product[]
+}
+
+model Reviews {
+  id        String   @id @default(cuid())
+  comment   String
+  rating    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  productId String?
+  Product   Product? @relation(fields: [productId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Category {
+  id         String       @id @default(cuid())
+  name       String       @unique
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  collection Collection[]
+}
+
+model User {
+  id            String     @id @default(cuid())
+  name          String?
+  email         String     @unique
+  emailVerified Boolean?
+  createdAt     DateTime   @default(now())
+  paymentMethod String?
+  CartItem      CartItem[]
+  Order         Order?
+  Reviews       Reviews[]
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  quantity  Int
+  size      String
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  color     String
+  product   Product  @relation(fields: [productId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Order {
+  id             String        @id @default(cuid())
+  userId         String        @unique
+  status         OrderStatus   @default(PENDING)
+  total_price    Int
+  payment_method String
+  address        String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now()) @updatedAt
+  user           User          @relation(fields: [userId], references: [id])
+  OrderedItem    OrderedItem[]
+  Transaction    Transaction[]
+}
+
+model OrderedItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  size      String
+  color     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  order     Order    @relation(fields: [orderId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model Featured {
+  id        String   @id @default(cuid())
+  productId String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model Transaction {
+  id            String            @id @default(cuid())
+  orderId       String?
+  amount        Float
+  currency      String
+  status        TransactionStatus @default(PENDING)
+  type          TransactionType   @default(PAYMENT)
+  paymentMethod String
+  errorMessage  String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  order         Order?            @relation(fields: [orderId], references: [id])
+}
+
+model BestSeller {
+  id      String    @id
+  Product Product[]
+}
+
+enum UploadStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+}
+
+enum Gender {
+  BOYS_CHILDREN
+  GIRLS_CHILDREN
+  MENS_ADULT
+  WOMENS_ADULT
+  UNISEX_CHILDREN
+  UNISEX_ADULT
+  UNISEX_ALL
+}
+
+enum OrderStatus {
+  PENDING
+  CANCELLED
+  PROCESSING
+  DELIVERED
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESSFUL
+  FAILED
+  REFUNDED
+}
+
+enum TransactionType {
+  PAYMENT
+  REFUND
+}
