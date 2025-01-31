@@ -11,9 +11,9 @@ export default function page() {
 
     // fetching data
 
-    const { data } = useFetchData({ url: `/api/products?title=${productInfo.title}`, refresh: 100 })
+    // const { data } = useFetchData({ url: `/api/products?title=${productInfo.title}`, refresh: 100 })
 
-
+let data:any;
 
     //     onError(error) {
     //         // console.log(error.data)

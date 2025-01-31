@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import ThemeColorButton from './themeColorButton';
 import { Button } from '@/components/ui/button';
 import { Heart } from 'lucide-react';
 import Image from 'next/image';
+import { ThemeColorButton } from '@/components';
 
 type Props = {
   urls: string,

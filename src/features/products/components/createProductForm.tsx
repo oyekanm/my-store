@@ -66,7 +66,8 @@ export default function createProductForm({ getProduct, editin }: Props) {
     const { updateProductImage, createProductImage, createImageUrl, error: imgErr, deleteImageColor } = useProductImageManagement()
     const { imageId, imagesColor, changeColor, changeImageId, changeProductInfo, productInfo } = useProductStore();
     // updateProductStatus
-    const { data } = useFetchData({ url: '/api/collectionType' })
+    // const { data } = useFetchData({ url: '/api/collectionType' })
+    let data
     useEffect(() => {
 
         if (getProduct) {

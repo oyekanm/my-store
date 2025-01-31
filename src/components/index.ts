@@ -8,3 +8,4 @@ export { default as TableComponent } from "./TableComponent";
 export { ModalTrigger } from "./Modal";
 export { default as Modal } from "./Modal";
 export { default as AdvancedSelect } from "./select";
+export {default as ThemeColorButton} from "./themeColorButton"
